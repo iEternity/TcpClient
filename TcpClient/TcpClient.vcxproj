@@ -70,6 +70,7 @@
     <ClCompile Include="TcpClient.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CountDownLatch.h" />
     <ClInclude Include="TcpClient.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>

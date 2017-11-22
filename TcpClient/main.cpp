@@ -7,19 +7,45 @@ using namespace net;
 
 void onMessage(const char* data, size_t len)
 {
-	cout << utility::UTF8_To_GBK(string(data, len)) << endl;
+	if (string(data, len) == "exit")
+	{
+		return;
+	}
+
+	auto isNeedResp = (string(data, 9) == "NEED_RESP");
+	if (isNeedResp)
+	{
+		cout << utility::UTF8_To_GBK(string(data + 9, len-9)) << endl;
+	}
+	else
+	{
+		cout << utility::UTF8_To_GBK(string(data, len)) << endl;
+	}
+}
+
+void test(int count)
+{
+	TcpClient client("192.168.8.63", 12345);
+	client.setMessageCallback(onMessage);
+	string line(3000, 'X');
+	for (int i = 0; i < count; i++)
+	{
+		client.send(line);
+		::Sleep(100);
+	}
 }
 
 int main()
 {
-	//TcpClient client("192.168.8.63", 12345);
-	TcpClient client("127.0.0.1", 31629);
+	test(1);
+	/*TcpClient client("192.168.8.63", 12345);
 	client.setMessageCallback(onMessage);
-	client.start();
 
 	std::string line;
 	while (getline(cin,line))
 	{
-		client.send(line.c_str(), line.size());
-	}
+		client.send(line);
+	}*/
+
+	system("pause");
 }

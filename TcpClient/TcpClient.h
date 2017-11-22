@@ -5,16 +5,16 @@
 #include <memory>
 #include <functional>
 #include <atomic>
+#include "CountDownLatch.h"
 
 namespace net
 {
 	class TcpClient;
-	using TcpClientPtr = std::shared_ptr<TcpClient>;
 	using ConnectCallback = std::function<void(const std::string& addr, bool isUp)>;
 	using MessageCallback = std::function<void(const char*, size_t)>;
-	using ErrorCallback = std::function<void(const TcpClientPtr&)>;
+	using ErrorCallback = std::function<void(const TcpClient&)>;
 
-class TcpClient : public std::enable_shared_from_this<TcpClient>
+class TcpClient
 {
 public:
 	TcpClient(const TcpClient&) = delete;
@@ -32,18 +32,18 @@ public:
 	void setErrorCallback(ErrorCallback&& cb)			{ errorCallback_   = std::move(cb); }
 
 	int send(const char* data, size_t len);
-	void start();
+	int send(const std::string& msg);
+	void disconnect();
 
 	std::string toIpPort();
 
-	//void sendThreadFunc();
-	void recvThreadFunc();
-
 private:
 	void initWinSock();
+	void initNewSocket();
 	static void handleError(const char* message);
+	void start();
 	void connect();
-	void reconnect();
+	void recvThreadFunc();
 
 private:
 	static const int kBufferSize = 1024*64;
@@ -61,6 +61,7 @@ private:
 	MessageCallback messageCallback_;
 	ErrorCallback errorCallback_;
 	std::atomic<bool> connected_;
+	CountDownLatch latch_;
 };
 
 }
