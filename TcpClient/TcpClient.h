@@ -10,11 +10,12 @@
 namespace net
 {
 	class TcpClient;
+	using TcpClientPtr = std::shared_ptr<TcpClient>;
 	using ConnectCallback = std::function<void(const std::string& addr, bool isUp)>;
-	using MessageCallback = std::function<void(const char*, size_t)>;
+	using MessageCallback = std::function<void(const TcpClientPtr&, int32_t, size_t)>;
 	using ErrorCallback = std::function<void(const TcpClient&)>;
 
-class TcpClient
+class TcpClient : public std::enable_shared_from_this<TcpClient>
 {
 public:
 	TcpClient(const TcpClient&) = delete;
@@ -33,6 +34,7 @@ public:
 
 	int send(const char* data, size_t len);
 	int send(const std::string& msg);
+	int read(char* buf, size_t size);
 	void disconnect();
 
 	std::string toIpPort();

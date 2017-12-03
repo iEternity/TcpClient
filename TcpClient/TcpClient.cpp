@@ -4,7 +4,13 @@
 using namespace net;
 using namespace std;
 
-void defaultOnMessage(const char* data, size_t len)
+struct Head
+{
+	int32_t request;
+	size_t size;
+};
+
+void defaultOnMessage(const TcpClientPtr& client, int32_t request, size_t len)
 {
 
 }
@@ -117,7 +123,7 @@ void TcpClient::recvThreadFunc()
 	int recvLen = 0;
 	while (true)
 	{
-		recvLen = ::recv(socket_, recvBuffer_, sizeof recvBuffer_, 0);
+		recvLen = ::recv(socket_, recvBuffer_, sizeof(Head), 0);
 		if (recvLen == 0)
 		{
 			connected_ = false;
@@ -130,7 +136,9 @@ void TcpClient::recvThreadFunc()
 			errorCallback_(*this);
 			break;
 		}
-		messageCallback_(recvBuffer_, recvLen);
+
+		Head* p = reinterpret_cast<Head*>(recvBuffer_);
+		messageCallback_(shared_from_this(), p->request, p->size);
 	}
 }
 
@@ -152,6 +160,23 @@ int TcpClient::send(const std::string& msg)
 	}
 
 	return ::send(socket_, msg.data(), msg.size(), 0);
+}
+
+int TcpClient::read(char* buf, size_t size)
+{
+	int recvLen = ::recv(socket_, buf, size, 0);
+	if (recvLen == 0)
+	{
+		connected_ = false;
+		connectCallback_(toIpPort(), false);
+	}
+	else if (recvLen < 0)
+	{
+		handleError("recvThreadFunc:recv error!");
+		errorCallback_(*this);
+	}
+
+	return recvLen;
 }
 
 void TcpClient::disconnect()
