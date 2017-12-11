@@ -101,6 +101,7 @@ void onMessage(const TcpClientPtr& client, int32_t request, size_t len)
 		cout << "文件大小：" << (double)len / (1024 * 1024) << "Mib" << endl;
 		onRecvFile(client, len);
 		cout << "文件接收完成！" << endl;
+		client->disconnect();
 	}
 	else
 	{

@@ -132,7 +132,7 @@ void TcpClient::recvThreadFunc()
 		}
 		else if (recvLen < 0)
 		{
-			handleError("recvThreadFunc:recv error!");
+			//handleError("recvThreadFunc:recv error!");
 			errorCallback_(*this);
 			break;
 		}
