@@ -4,13 +4,7 @@
 using namespace net;
 using namespace std;
 
-struct Head
-{
-	int32_t request;
-	size_t size;
-};
-
-void defaultOnMessage(const TcpClientPtr& client, int32_t request, size_t len)
+void defaultOnMessage(const char* data, size_t size)
 {
 
 }
@@ -123,7 +117,7 @@ void TcpClient::recvThreadFunc()
 	int recvLen = 0;
 	while (true)
 	{
-		recvLen = ::recv(socket_, recvBuffer_, sizeof(Head), 0);
+		recvLen = ::recv(socket_, recvBuffer_, sizeof(recvBuffer_), 0);
 		if (recvLen == 0)
 		{
 			connected_ = false;
@@ -137,8 +131,7 @@ void TcpClient::recvThreadFunc()
 			break;
 		}
 
-		Head* p = reinterpret_cast<Head*>(recvBuffer_);
-		messageCallback_(shared_from_this(), p->request, p->size);
+		messageCallback_(recvBuffer_, recvLen);
 	}
 }
 
